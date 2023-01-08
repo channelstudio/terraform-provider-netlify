@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/netlify/open-api/v2/go/models"
 	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
@@ -48,35 +48,6 @@ func resourceEnvVar() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-
-			"value": {
-				Type:        schema.TypeList,
-				Description: "Values of this environment variable for a specific deploy context.",
-				Required:    true,
-				MinItems:    1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-						"context": {
-							Type:        schema.TypeString,
-							Description: "The deploy context in which this value will be used. `dev` refers to local development when running `netlify dev`. Enum: [`all` `dev` `branch-deploy` `deploy-preview` `production`]",
-							Optional:    true,
-						},
-
-						"id": {
-							Type:        schema.TypeString,
-							Description: "The environment variable value's universally unique ID",
-							Computed:    true,
-						},
-
-						"value": {
-							Type:        schema.TypeString,
-							Description: "The environment variable's unencrypted value",
-							Required:    true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -86,13 +57,11 @@ func resourceEnvVarCreate(d *schema.ResourceData, metaRaw interface{}) error {
 
 	// initialize creation parameters with default account ID, or supplied.
 	params := operations.NewCreateEnvVarsParams()
+	key := d.Get("key").(string)
 	site_id := d.Get("site_id").(string)
 	params.AccountID = d.Get("account_id").(string)
 	params.SiteID = &site_id
-	key := d.Get("key").(string)
 
-	// parse environment variables from struct
-	environment_variables := []*models.CreateEnvVarsParamsBodyItems{}
 	// build env vars create object
 	env_vars := models.CreateEnvVarsParamsBodyItems{}
 	env_vars.Key = key
@@ -108,23 +77,19 @@ func resourceEnvVarCreate(d *schema.ResourceData, metaRaw interface{}) error {
 			env_vars.Scopes = scopes
 		}
 	}
+	// if no scope found, set to all scopes
 	if env_vars.Scopes == nil {
 		env_vars.Scopes = []string{"builds", "functions", "post_processing", "runtime"}
 	}
 
-	// set the values of the environment variable
-	values := []*models.EnvVarValue{}
-	for _, value := range d.Get("value").([]interface{}) {
-		valueM := value.(map[string]interface{})
-		values = append(values, &models.EnvVarValue{
-			Context: valueM["context"].(string),
-			ID:      valueM["id"].(string),
-			Value:   valueM["value"].(string),
-		})
+	// we need a placeholder value to be able to create the key
+	env_vars.Values = []*models.EnvVarValue{
+		{
+			Context: "all",
+			Value:   "",
+		},
 	}
-	env_vars.Values = values
-	environment_variables = append(environment_variables, &env_vars)
-	params.EnvVars = environment_variables
+	params.EnvVars = []*models.CreateEnvVarsParamsBodyItems{&env_vars}
 
 	// perform the operation
 	_, err := meta.Netlify.Operations.CreateEnvVars(params, meta.AuthInfo)
@@ -141,13 +106,10 @@ func resourceEnvVarRead(d *schema.ResourceData, metaRaw interface{}) error {
 	meta := metaRaw.(*Meta)
 	params := operations.NewGetEnvVarParams()
 	// get account ID, site ID, and Key from resource ID
-	split := strings.Split(d.Id(), "/")
-	params.Key = split[0]
-	params.AccountID = split[1]
-	if len(split[2]) > 0 {
-		site_id := split[2]
-		params.SiteID = &site_id
-	}
+	account_id, site_id, key := getEnvVarInfoFromResourceId(d.Id())
+	params.AccountID = account_id
+	params.SiteID = site_id
+	params.Key = key
 
 	resp, err := meta.Netlify.Operations.GetEnvVar(params, meta.AuthInfo)
 	if err != nil {
@@ -160,16 +122,6 @@ func resourceEnvVarRead(d *schema.ResourceData, metaRaw interface{}) error {
 	envVar := resp.Payload
 	d.Set("key", envVar.Key)
 	d.Set("scopes", envVar.Scopes)
-
-	// otherwise, populate each of the values with their corresponding info
-	for i, value := range envVar.Values {
-		d.Set(fmt.Sprintf("value.%d", i), map[string]interface{}{
-			"context": value.Context,
-			"id":      value.ID,
-			"value":   value.Value,
-		})
-	}
-
 	return err
 }
 
@@ -201,17 +153,16 @@ func resourceEnvVarUpdate(d *schema.ResourceData, metaRaw interface{}) error {
 		env_vars.Scopes = []string{"builds", "functions", "post_processing", "runtime"}
 	}
 
-	// set the values for each environment variable
-	values := []*models.EnvVarValue{}
-	for _, value := range d.Get("value").([]interface{}) {
-		valueM := value.(map[string]interface{})
-		values = append(values, &models.EnvVarValue{
-			Context: valueM["context"].(string),
-			ID:      valueM["id"].(string),
-			Value:   valueM["value"].(string),
-		})
+	// query for previous values, which we need to preserve
+	params_get := operations.NewGetEnvVarParams()
+	params_get.AccountID = account_id
+	params_get.SiteID = site_id
+	params_get.Key = key
+	resp_get, err_get := meta.Netlify.Operations.GetEnvVar(params_get, meta.AuthInfo)
+	if err_get != nil {
+		return err_get
 	}
-	env_vars.Values = values
+	env_vars.Values = resp_get.Payload.Values
 	params.EnvVar = &env_vars
 
 	// perform the operation

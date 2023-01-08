@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/netlify/open-api/v2/go/models"
 	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
@@ -17,9 +17,9 @@ func TestAccEnvVar_basic(t *testing.T) {
 	resourceName := "netlify_site.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSiteAndEnvVarsDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckSiteAndEnvVarsDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEnvVarSiteSpecificConfig,
@@ -49,9 +49,9 @@ func TestAccEnvVar_disappears(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSiteAndEnvVarsDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckSiteAndEnvVarsDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEnvVarSiteSpecificConfig,
@@ -71,9 +71,9 @@ func TestAccEnvVar_updatesKey(t *testing.T) {
 	var envVar models.EnvVar
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSiteAndEnvVarsDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckSiteAndEnvVarsDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEnvVarSiteSpecificConfig,
@@ -85,41 +85,6 @@ func TestAccEnvVar_updatesKey(t *testing.T) {
 				Config: testAccEnvVarSiteSpecificConfigUpdateKey,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckEnvVarExists("var1", "var3", &envVar),
-				),
-			},
-		},
-	})
-}
-
-func TestAccEnvVar_updatesValue(t *testing.T) {
-	var envVar models.EnvVar
-	var envVarUpdated models.EnvVar
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSiteAndEnvVarsDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEnvVarSiteSpecificConfig,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckEnvVarExists("var1", "var1", &envVar),
-				),
-			},
-			{
-				Config: testAccEnvVarSiteSpecificConfigUpdateValue,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckEnvVarExists("var1", "var1", &envVarUpdated),
-					testAccAssert("environment variable changed contexts and values", func() bool {
-						for _, v := range envVar.Values {
-							for _, v2 := range envVarUpdated.Values {
-								if v2.ID == v.ID && (v2.Context == v.Context || v2.Value == v.Value) {
-									return false
-								}
-							}
-						}
-						return true
-					}),
 				),
 			},
 		},
@@ -190,28 +155,12 @@ resource "netlify_environment_variable" "var1" {
 	account_id = netlify_site.test.account_slug
 	site_id = netlify_site.test.id
 	key	= "var1"
-	value {
-		context = "dev"
-		value = "SOME VALUE"
-	}
-	value {
-		context = "production"
-		value = "SOME VALUE"
-	}
 }
 
 resource "netlify_environment_variable" "var2" {
 	account_id = netlify_site.test.account_slug
 	site_id = netlify_site.test.id
 	key	= "var2"
-	value {
-		context = "dev"
-		value = "SOME VALUE 1"
-	}
-	value {
-		context = "production"
-		value = "SOME VALUE 2"
-	}
 }
 `
 
@@ -222,59 +171,11 @@ resource "netlify_environment_variable" "var1" {
 	account_id = netlify_site.test.account_slug
 	site_id = netlify_site.test.id
 	key	= "var3"
-	value {
-		context = "dev"
-		value = "SOME VALUE"
-	}
-	value {
-		context = "production"
-		value = "SOME VALUE"
-	}
 }
 
 resource "netlify_environment_variable" "var2" {
 	account_id = netlify_site.test.account_slug
 	site_id = netlify_site.test.id
 	key	= "var2"
-	value {
-		context = "dev"
-		value = "SOME VALUE 1"
-	}
-	value {
-		context = "production"
-		value = "SOME VALUE 2"
-	}
-}
-`
-
-var testAccEnvVarSiteSpecificConfigUpdateValue = `
-resource "netlify_site" "test" {}
-
-resource "netlify_environment_variable" "var1" {
-	account_id = netlify_site.test.account_slug
-	site_id = netlify_site.test.id
-	key	= "var1"
-	value {
-		context = "all"
-		value = "changeddev"
-	}
-	value {
-		context = "deploy-preview"
-		value = "changedprod"
-	}
-}
-
-resource "netlify_environment_variable" "var2" {
-	account_id = netlify_site.test.account_slug
-	site_id = netlify_site.test.id
-	key	= "var2"
-	value {
-		context = "dev"
-		value = "SOME VALUE 1"
-	}
-	value {
-		context = "production"
-		value = "SOME VALUE 2"
-	}
 }
 `

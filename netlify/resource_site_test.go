@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/netlify/open-api/v2/go/models"
 	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
@@ -16,9 +15,9 @@ func TestAccSite_basic(t *testing.T) {
 	resourceName := "netlify_site.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSiteDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckSiteDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSiteConfig_repo,
@@ -42,9 +41,9 @@ func TestAccSite_disappears(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSiteDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckSiteDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSiteConfig,
@@ -61,13 +60,12 @@ func TestAccSite_disappears(t *testing.T) {
 func TestAccSite_updateName(t *testing.T) {
 	var site models.Site
 	resourceName := "netlify_site.test"
-	siteName := fmt.Sprintf("test-%s", acctest.RandStringFromCharSet(
-		5, acctest.CharSetAlphaNum))
+	siteName := fmt.Sprintf("test-%s", "new-name")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSiteDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckSiteDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSiteConfig,

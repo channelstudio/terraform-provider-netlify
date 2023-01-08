@@ -1,7 +1,7 @@
 package netlify
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
 

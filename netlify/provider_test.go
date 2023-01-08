@@ -5,29 +5,33 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var testAccProviders map[string]terraform.ResourceProvider
+// Use the same provider for all tests. This way it will be initialized so we
+// can use its Netlify client to make our API calls for checking resources.
 var testAccProvider *schema.Provider
 
+// providerFactories are used to instantiate a provider during acceptance testing.
+// The factory function will be invoked for every Terraform CLI command executed
+// to create a provider server to which the CLI can reattach.
+var providerFactories = map[string]func() (*schema.Provider, error){
+	"netlify": func() (*schema.Provider, error) {
+		return testAccProvider, nil
+	},
+}
+var netlify *schema.Provider
+
 func init() {
-	testAccProvider = Provider().(*schema.Provider)
-	testAccProviders = map[string]terraform.ResourceProvider{
-		"netlify": testAccProvider,
-	}
+	testAccProvider = New("dev")()
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := New("dev")().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
-}
-
-func TestProvider_impl(t *testing.T) {
-	var _ terraform.ResourceProvider = Provider()
 }
 
 func testAccPreCheck(t *testing.T) {
@@ -36,6 +40,7 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
+// common assertion test case
 func testAccAssert(msg string, f func() bool) resource.TestCheckFunc {
 	return func(*terraform.State) error {
 		if f() {

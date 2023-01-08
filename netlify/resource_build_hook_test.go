@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/netlify/open-api/v2/go/models"
 	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
@@ -15,9 +15,9 @@ func TestAccBuildHook(t *testing.T) {
 	resourceName := "netlify_build_hook.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBuildHookDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckBuildHookDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBuildHookConfig,
@@ -43,9 +43,9 @@ func TestAccBuildHook_disappears(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBuildHookDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckBuildHookDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBuildHookConfig,
@@ -64,9 +64,9 @@ func TestAccBuildHook_updateBranch(t *testing.T) {
 	resourceName := "netlify_build_hook.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBuildHookDestroy,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckBuildHookDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBuildHookConfig,
