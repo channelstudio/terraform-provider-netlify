@@ -3,6 +3,7 @@ package netlify
 import (
 	"context"
 
+	"github.com/go-openapi/runtime"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,8 +74,8 @@ func resourceEnvVarValueCreateOrUpdate(c context.Context, d *schema.ResourceData
 	// perform operation
 	_, err := meta.Netlify.Operations.SetEnvVarValue(params, meta.AuthInfo)
 	if err != nil {
-		// default response is OK if it's just the default
-		if v, ok := err.(*operations.SetEnvVarValueDefault); !ok && v == nil {
+		// 200 status codes are generally okay
+		if v, ok := err.(*runtime.APIError); !ok || v.Code != 200 {
 			return diag.FromErr(err)
 		}
 	}
