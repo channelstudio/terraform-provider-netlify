@@ -3,12 +3,15 @@ module github.com/terraform-providers/terraform-provider-netlify
 go 1.19
 
 require (
+	github.com/Azure/go-autorest v14.2.0+incompatible
 	github.com/go-openapi/runtime v0.19.24
 	github.com/go-openapi/strfmt v0.19.11
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/hashicorp/terraform v0.12.1
 	github.com/netlify/open-api/v2 v2.12.2
 )
+
+require github.com/hashicorp/terraform-plugin-docs v0.13.0
 
 require (
 	cloud.google.com/go v0.36.0 // indirect
@@ -66,7 +69,6 @@ require (
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20190327195015-8022a2663a70 // indirect
 	github.com/hashicorp/terraform-exec v0.17.2 // indirect
 	github.com/hashicorp/terraform-json v0.14.0 // indirect
-	github.com/hashicorp/terraform-plugin-docs v0.13.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
@@ -95,7 +97,6 @@ require (
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/ulikunitz/xz v0.5.5 // indirect
-	github.com/vmihailenco/msgpack v4.0.1+incompatible // indirect
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
 	github.com/vmihailenco/tagparser v0.1.1 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
