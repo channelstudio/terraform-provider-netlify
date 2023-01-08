@@ -9,7 +9,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/logging"
-	"github.com/netlify/open-api/go/porcelain"
+	"github.com/netlify/open-api/v2/go/porcelain"
 )
 
 type Config struct {

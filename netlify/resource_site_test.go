@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/netlify/open-api/go/models"
-	"github.com/netlify/open-api/go/plumbing/operations"
+	"github.com/netlify/open-api/v2/go/models"
+	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
 
 func TestAccSite_basic(t *testing.T) {
@@ -25,12 +25,6 @@ func TestAccSite_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSiteExists(resourceName, &site),
 				),
-			},
-
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})

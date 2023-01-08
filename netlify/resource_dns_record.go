@@ -2,8 +2,8 @@ package netlify
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/netlify/open-api/go/models"
-	"github.com/netlify/open-api/go/plumbing/operations"
+	"github.com/netlify/open-api/v2/go/models"
+	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
 
 func resourceDnsRecord() *schema.Resource {

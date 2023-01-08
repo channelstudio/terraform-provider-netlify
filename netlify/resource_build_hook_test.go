@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/netlify/open-api/go/models"
-	"github.com/netlify/open-api/go/plumbing/operations"
+	"github.com/netlify/open-api/v2/go/models"
+	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
 
 func TestAccBuildHook(t *testing.T) {

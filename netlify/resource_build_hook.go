@@ -2,8 +2,8 @@ package netlify
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/netlify/open-api/go/models"
-	"github.com/netlify/open-api/go/plumbing/operations"
+	"github.com/netlify/open-api/v2/go/models"
+	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
 
 func resourceBuildHook() *schema.Resource {
@@ -43,7 +43,7 @@ func resourceBuildHook() *schema.Resource {
 func resourceBuildHookCreate(d *schema.ResourceData, metaRaw interface{}) error {
 	params := operations.NewCreateSiteBuildHookParams()
 	params.SiteID = d.Get("site_id").(string)
-	params.BuildHook = resourceBuildHook_struct(d)
+	params.BuildHook = resourceBuildHookSetup_struct(d)
 
 	meta := metaRaw.(*Meta)
 	resp, err := meta.Netlify.Operations.CreateSiteBuildHook(params, meta.AuthInfo)
@@ -84,7 +84,7 @@ func resourceBuildHookUpdate(d *schema.ResourceData, metaRaw interface{}) error 
 	params := operations.NewUpdateSiteBuildHookParams()
 	params.ID = d.Id()
 	params.SiteID = d.Get("site_id").(string)
-	params.BuildHook = resourceBuildHook_struct(d)
+	params.BuildHook = resourceBuildHookSetup_struct(d)
 
 	meta := metaRaw.(*Meta)
 	_, err := meta.Netlify.Operations.UpdateSiteBuildHook(params, meta.AuthInfo)
@@ -105,8 +105,8 @@ func resourceBuildHookDelete(d *schema.ResourceData, metaRaw interface{}) error 
 }
 
 // Returns the BuildHook structure that can be used for creation or updating.
-func resourceBuildHook_struct(d *schema.ResourceData) *models.BuildHook {
-	return &models.BuildHook{
+func resourceBuildHookSetup_struct(d *schema.ResourceData) *models.BuildHookSetup {
+	return &models.BuildHookSetup{
 		Branch: d.Get("branch").(string),
 		Title:  d.Get("title").(string),
 	}
