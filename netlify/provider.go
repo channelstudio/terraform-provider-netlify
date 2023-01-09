@@ -41,7 +41,9 @@ func New(version string) func() *schema.Provider {
 					Description: "The Netlify Base API URL",
 				},
 			},
-
+			DataSourcesMap: map[string]*schema.Resource{
+				"netlify_site": dataSourceSite(),
+			},
 			ResourcesMap: map[string]*schema.Resource{
 				"netlify_build_hook":                 resourceBuildHook(),
 				"netlify_branch_deploy":              resourceBranchDeploy(),
@@ -53,8 +55,6 @@ func New(version string) func() *schema.Provider {
 				"netlify_dns_zone":                   resourceDnsZone(),
 				"netlify_dns_record":                 resourceDnsRecord(),
 			},
-
-			DataSourcesMap: map[string]*schema.Resource{},
 		}
 		p.ConfigureContextFunc = configure(version, p)
 		return p
