@@ -30,10 +30,10 @@ func resourceEnvVarValue() *schema.Resource {
 
 			"context": {
 				Type:        schema.TypeString,
-				Description: "The deploy context in which this value will be used. `dev` refers to local development when running `netlify dev`. Enum: [`all` `dev` `branch-deploy` `deploy-preview` `production`]",
+				Description: "The deploy context in which this value will be used. `dev` refers to local development when running `netlify dev`. Enum: [ `dev` `branch-deploy` `deploy-preview` `production`]",
 				Required:    true,
 				ValidateDiagFunc: func(value interface{}, path cty.Path) diag.Diagnostics {
-					for _, v := range []string{"all", "dev", "branch-deploy", "deploy-preview", "production"} {
+					for _, v := range []string{"dev", "branch-deploy", "deploy-preview", "production"} {
 						if v == value.(string) {
 							return nil
 						}
@@ -42,7 +42,7 @@ func resourceEnvVarValue() *schema.Resource {
 						diag.Diagnostic{
 							Severity: diag.Error,
 							Summary:  "Context level invalid.",
-							Detail:   "Must be one of [`all` `dev` `branch-deploy` `deploy-preview` `production`]",
+							Detail:   "Must be one of [`dev` `branch-deploy` `deploy-preview` `production`]",
 						},
 					}
 				},

@@ -79,6 +79,12 @@ func resourceSite() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+
+						"public_repo": {
+							Type: schema.TypeBool,
+							Required: true,
+							Default: true,
+						},
 					},
 				},
 			},
@@ -151,6 +157,7 @@ func resourceSiteRead(d *schema.ResourceData, metaRaw interface{}) error {
 				"provider":      site.BuildSettings.Provider,
 				"repo_path":     site.BuildSettings.RepoPath,
 				"repo_branch":   site.BuildSettings.RepoBranch,
+				"public_repo": 	 site.BuildSettings.PublicRepo,
 			},
 		})
 	}
@@ -201,6 +208,7 @@ func resourceSite_setupStruct(d *schema.ResourceData) *models.SiteSetup {
 			Provider:    repo["provider"].(string),
 			RepoPath:    repo["repo_path"].(string),
 			RepoBranch:  repo["repo_branch"].(string),
+			PublicRepo:  repo["public_repo"].(bool),
 		}
 	}
 
