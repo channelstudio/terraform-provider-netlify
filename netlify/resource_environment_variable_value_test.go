@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/netlify/open-api/v2/go/models"
 	"github.com/netlify/open-api/v2/go/plumbing/operations"
 )
 
@@ -21,6 +22,51 @@ func TestAccEnvVarValue_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvVarHasValue("var1_dev", "dev", "test"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccEnvVarValue_disappears(t *testing.T) {
+	var site models.Site
+	destroy := func(*terraform.State) error {
+		meta := testAccProvider.Meta().(*Meta)
+		params := operations.NewDeleteSiteParams()
+		params.SiteID = site.ID
+		_, err := meta.Netlify.Operations.DeleteSite(params, meta.AuthInfo)
+		return err
+	}
+
+	getEnvVars := func(*terraform.State) error {
+		params := operations.NewGetEnvVarParams()
+		params.AccountID = site.AccountSlug
+		params.SiteID = &site.ID
+		params.Key = "var1"
+		meta := testAccProvider.Meta().(*Meta)
+		resp, err := meta.Netlify.Operations.GetEnvVar(params, meta.AuthInfo)
+		if err != nil {
+			// If it is a 404 it was removed remotely
+			if v, ok := err.(*operations.GetEnvVarDefault); ok && v.Code() == 404 {
+				return nil
+			}
+			return err
+		}
+		return nil
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckSiteDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSiteConfig,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckSiteExists("netlify_site.test", &site),
+					destroy,
+					getEnvVars,
+				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

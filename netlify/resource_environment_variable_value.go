@@ -98,7 +98,7 @@ func resourceEnvVarValueRead(c context.Context, d *schema.ResourceData, metaRaw 
 	resp, err := meta.Netlify.Operations.GetEnvVar(params, meta.AuthInfo)
 	if err != nil {
 		// If it is a 404 it was removed remotely
-		if v, ok := err.(*operations.GetSiteDefault); ok && v.Code() == 404 {
+		if v, ok := err.(*operations.GetEnvVarDefault); ok && v.Code() == 404 {
 			d.SetId("")
 			return nil
 		}
