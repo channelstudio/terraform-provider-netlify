@@ -82,7 +82,7 @@ func resourceSite() *schema.Resource {
 
 						"public_repo": {
 							Type: schema.TypeBool,
-							Required: true,
+							Optional: true,
 							Default: true,
 						},
 					},
