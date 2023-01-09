@@ -85,6 +85,11 @@ func resourceSite() *schema.Resource {
 							Optional: true,
 							Default: true,
 						},
+
+						"installation_id": {
+							Type: 		schema.TypeFloat,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -94,6 +99,11 @@ func resourceSite() *schema.Resource {
 
 func resourceSiteCreate(d *schema.ResourceData, metaRaw interface{}) error {
 	meta := metaRaw.(*Meta)
+
+	// If we are trying to create a site using a private repository (i.e. not
+	// a public_repo) then we need to get an installation id for the provider.
+	// The easiest (and only way I can see) of doing this is by querying a user's
+	// pre-existing sites and getting it from there. 
 
 	// If we have an "account_slug" set we use a different API path that lets
 	// us create a site in a specific team. Unfortunately we have to duplicate
@@ -158,6 +168,7 @@ func resourceSiteRead(d *schema.ResourceData, metaRaw interface{}) error {
 				"repo_path":     site.BuildSettings.RepoPath,
 				"repo_branch":   site.BuildSettings.RepoBranch,
 				"public_repo": 	 site.BuildSettings.PublicRepo,
+				"installation_id": site.BuildSettings.InstallationID,
 			},
 		})
 	}
@@ -209,6 +220,7 @@ func resourceSite_setupStruct(d *schema.ResourceData) *models.SiteSetup {
 			RepoPath:    repo["repo_path"].(string),
 			RepoBranch:  repo["repo_branch"].(string),
 			PublicRepo:  repo["public_repo"].(bool),
+			InstallationID: repo["installation_id"].(int64),
 		}
 	}
 
