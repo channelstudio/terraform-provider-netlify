@@ -80,14 +80,8 @@ func resourceSite() *schema.Resource {
 							Required: true,
 						},
 
-						"public_repo": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  true,
-						},
-
 						"installation_id": {
-							Type:     schema.TypeFloat,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 					},
@@ -167,7 +161,6 @@ func resourceSiteRead(d *schema.ResourceData, metaRaw interface{}) error {
 				"provider":        site.BuildSettings.Provider,
 				"repo_path":       site.BuildSettings.RepoPath,
 				"repo_branch":     site.BuildSettings.RepoBranch,
-				"public_repo":     site.BuildSettings.PublicRepo,
 				"installation_id": site.BuildSettings.InstallationID,
 			},
 		})
@@ -219,8 +212,7 @@ func resourceSite_setupStruct(d *schema.ResourceData) *models.SiteSetup {
 			Provider:       repo["provider"].(string),
 			RepoPath:       repo["repo_path"].(string),
 			RepoBranch:     repo["repo_branch"].(string),
-			PublicRepo:     repo["public_repo"].(bool),
-			InstallationID: repo["installation_id"].(int64),
+			InstallationID: int64(repo["installation_id"].(int)),
 		}
 	}
 

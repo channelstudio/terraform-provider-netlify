@@ -43,7 +43,7 @@ func TestAccEnvVarValue_disappears(t *testing.T) {
 		params.SiteID = &site.ID
 		params.Key = "var1"
 		meta := testAccProvider.Meta().(*Meta)
-		resp, err := meta.Netlify.Operations.GetEnvVar(params, meta.AuthInfo)
+		_, err := meta.Netlify.Operations.GetEnvVar(params, meta.AuthInfo)
 		if err != nil {
 			// If it is a 404 it was removed remotely
 			if v, ok := err.(*operations.GetEnvVarDefault); ok && v.Code() == 404 {
